@@ -21,6 +21,7 @@ export interface ServerMethods {
 	'updateOutgoingIntegration': (...args: any[]) => any;
 	'checkRegistrationSecretURL'(hash: string): boolean;
 	setUsername(username: string, param?: { joinDefaultChannelsSilenced?: boolean }): Promise<string>;
+	'livechat:resumeOnHold'(roomId: string, options: { clientAction: boolean }): Promise<void>;
 }
 
 export type ServerMethodName = keyof ServerMethods;

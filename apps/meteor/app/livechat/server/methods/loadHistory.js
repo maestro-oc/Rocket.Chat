@@ -1,8 +1,7 @@
 import { Meteor } from 'meteor/meteor';
-import { LivechatVisitors } from '@rocket.chat/models';
+import { LivechatVisitors, LivechatRooms } from '@rocket.chat/models';
 
 import { loadMessageHistory } from '../../../lib/server';
-import { LivechatRooms } from '../../../models/server';
 import { methodDeprecationLogger } from '../../../lib/server/lib/deprecationWarningLogger';
 
 Meteor.methods({
@@ -21,7 +20,7 @@ Meteor.methods({
 			});
 		}
 
-		const room = LivechatRooms.findOneByIdAndVisitorToken(rid, token, { _id: 1 });
+		const room = await LivechatRooms.findOneByIdAndVisitorToken(rid, token, { _id: 1 });
 		if (!room) {
 			throw new Meteor.Error('invalid-room', 'Invalid Room', { method: 'livechat:loadHistory' });
 		}

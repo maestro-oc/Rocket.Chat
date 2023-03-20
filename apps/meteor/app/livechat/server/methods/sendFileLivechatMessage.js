@@ -1,9 +1,8 @@
 import { Meteor } from 'meteor/meteor';
 import { Match, check } from 'meteor/check';
 import { Random } from '@rocket.chat/random';
-import { LivechatVisitors } from '@rocket.chat/models';
+import { LivechatVisitors, LivechatRooms } from '@rocket.chat/models';
 
-import { LivechatRooms } from '../../../models/server';
 import { FileUpload } from '../../../file-upload/server';
 
 Meteor.methods({
@@ -14,7 +13,7 @@ Meteor.methods({
 			return false;
 		}
 
-		const room = LivechatRooms.findOneOpenByRoomIdAndVisitorToken(roomId, visitorToken);
+		const room = await LivechatRooms.findOneOpenByRoomIdAndVisitorToken(roomId, visitorToken);
 
 		if (!room) {
 			return false;
