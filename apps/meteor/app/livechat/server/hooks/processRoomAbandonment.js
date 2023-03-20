@@ -1,9 +1,9 @@
 import moment from 'moment';
-import { LivechatBusinessHours, LivechatDepartment } from '@rocket.chat/models';
+import { LivechatBusinessHours, LivechatDepartment, LivechatRooms } from '@rocket.chat/models';
 
 import { settings } from '../../../settings/server';
 import { callbacks } from '../../../../lib/callbacks';
-import { LivechatRooms, Messages } from '../../../models/server';
+import { Messages } from '../../../models/server';
 import { businessHourManager } from '../business-hour';
 
 const getSecondsWhenOfficeHoursIsDisabled = (room, agentLastMessage) =>
@@ -71,7 +71,7 @@ callbacks.add(
 			return params;
 		}
 		const secondsSinceLastAgentResponse = Promise.await(getSecondsSinceLastAgentResponse(room, agentLastMessage));
-		LivechatRooms.setVisitorInactivityInSecondsById(room._id, secondsSinceLastAgentResponse);
+		Promise.await(LivechatRooms.setVisitorInactivityInSecondsById(room._id, secondsSinceLastAgentResponse));
 
 		return params;
 	},
