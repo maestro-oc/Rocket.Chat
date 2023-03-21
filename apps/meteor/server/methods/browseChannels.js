@@ -2,11 +2,10 @@ import { Meteor } from 'meteor/meteor';
 import { DDPRateLimiter } from 'meteor/ddp-rate-limiter';
 import mem from 'mem';
 import { escapeRegExp } from '@rocket.chat/string-helpers';
-import { Rooms, Users } from '@rocket.chat/models';
+import { Rooms, Users, Subscriptions } from '@rocket.chat/models';
 import { Team } from '@rocket.chat/core-services';
 
 import { hasPermission } from '../../app/authorization/server';
-import { Subscriptions } from '../../app/models/server';
 import { settings } from '../../app/settings/server';
 import { getFederationDomain } from '../../app/federation/server/lib/getFederationDomain';
 import { isFederationEnabled } from '../../app/federation/server/lib/isFederationEnabled';
@@ -114,7 +113,7 @@ async function getTeams(user, searchTerm, sort, pagination) {
 		return;
 	}
 
-	const userSubs = Subscriptions.cachedFindByUserId(user._id).fetch();
+	const userSubs = await Subscriptions.cachedFindByUserId(user._id).toArray();
 	const ids = userSubs.map((sub) => sub.rid);
 	const { cursor, totalCount } = Rooms.findPaginatedContainingNameOrFNameInIdsAsTeamMain(
 		searchTerm ? new RegExp(searchTerm, 'i') : null,

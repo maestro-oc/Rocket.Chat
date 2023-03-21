@@ -1,5 +1,6 @@
 import { Meteor } from 'meteor/meteor';
 import { Match, check } from 'meteor/check';
+import { Subscriptions } from '@rocket.chat/models';
 
 import {
 	createLivechatSubscription,
@@ -13,7 +14,7 @@ import {
 } from './Helper';
 import { callbacks } from '../../../../lib/callbacks';
 import { Logger } from '../../../../server/lib/logger/Logger';
-import { LivechatRooms, Rooms, Messages, Users, LivechatInquiry, Subscriptions } from '../../../models/server';
+import { LivechatRooms, Rooms, Messages, Users, LivechatInquiry } from '../../../models/server';
 import { Apps, AppEvents } from '../../../../ee/server/apps';
 
 const logger = new Logger('RoutingManager');
@@ -139,7 +140,7 @@ export const RoutingManager = {
 		if (servedBy) {
 			logger.debug(`Unassigning current agent for inquiry ${inquiry._id}`);
 			LivechatRooms.removeAgentByRoomId(rid);
-			this.removeAllRoomSubscriptions(room);
+			await this.removeAllRoomSubscriptions(room);
 			dispatchAgentDelegated(rid, null);
 		}
 
@@ -238,10 +239,10 @@ export const RoutingManager = {
 		return defaultAgent;
 	},
 
-	removeAllRoomSubscriptions(room, ignoreUser) {
+	async removeAllRoomSubscriptions(room, ignoreUser) {
 		const { _id: roomId } = room;
 
-		const subscriptions = Subscriptions.findByRoomId(roomId).fetch();
+		const subscriptions = await Subscriptions.findByRoomId(roomId).toArray();
 		subscriptions?.forEach(({ u }) => {
 			if (ignoreUser && ignoreUser._id === u._id) {
 				return;

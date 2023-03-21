@@ -1,15 +1,16 @@
 import { Meteor } from 'meteor/meteor';
 import { Match, check } from 'meteor/check';
 import _ from 'underscore';
+import { Subscriptions } from '@rocket.chat/models';
 
 import { hasPermission } from '../../app/authorization/server';
-import { Rooms, Subscriptions, Users } from '../../app/models/server';
+import { Rooms, Users } from '../../app/models/server';
 import { getUserPreference } from '../../app/utils/server';
 import { settings } from '../../app/settings/server';
 import { trim } from '../../lib/utils/stringUtils';
 
 Meteor.methods({
-	channelsList(filter, channelType, limit, sort) {
+	async channelsList(filter, channelType, limit, sort) {
 		check(filter, String);
 		check(channelType, String);
 		check(limit, Match.Optional(Number));
@@ -61,9 +62,7 @@ Meteor.methods({
 					channels = channels.concat(Rooms.findByType('c', options).fetch());
 				}
 			} else if (hasPermission(userId, 'view-joined-room')) {
-				const roomIds = Subscriptions.findByTypeAndUserId('c', userId, { fields: { rid: 1 } })
-					.fetch()
-					.map((s) => s.rid);
+				const roomIds = (await Subscriptions.findByTypeAndUserId('c', userId, { projection: { rid: 1 } }).toArray()).map((s) => s.rid);
 				if (filter) {
 					channels = channels.concat(Rooms.findByTypeInIdsAndNameContaining('c', roomIds, filter, options).fetch());
 				} else {
@@ -84,9 +83,7 @@ Meteor.methods({
 			const groupByType = userPref !== undefined ? userPref : settings.get('UI_Group_Channels_By_Type');
 
 			if (!groupByType) {
-				const roomIds = Subscriptions.findByTypeAndUserId('p', userId, { fields: { rid: 1 } })
-					.fetch()
-					.map((s) => s.rid);
+				const roomIds = (await Subscriptions.findByTypeAndUserId('p', userId, { fields: { rid: 1 } }).toArray()).map((s) => s.rid);
 				if (filter) {
 					channels = channels.concat(Rooms.findByTypeInIdsAndNameContaining('p', roomIds, filter, options).fetch());
 				} else {

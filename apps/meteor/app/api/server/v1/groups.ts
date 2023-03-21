@@ -5,7 +5,7 @@ import { Subscriptions, Rooms, Messages, Users, Uploads, Integrations } from '@r
 import { Team } from '@rocket.chat/core-services';
 import type { Filter } from 'mongodb';
 
-import { Rooms as RoomSync, Users as UsersSync, Subscriptions as SubscriptionsSync } from '../../../models/server';
+import { Rooms as RoomSync, Users as UsersSync } from '../../../models/server';
 import {
 	hasPermission,
 	hasAtLeastOnePermission,
@@ -1155,11 +1155,11 @@ API.v1.addRoute(
 				userId: this.userId,
 			});
 
-			const moderators = await SubscriptionsSync.findByRoomIdAndRoles(findResult.rid, ['moderator'], {
-				fields: { u: 1 },
-			})
-				.fetch()
-				.map((sub: any) => sub.u);
+			const moderators = (
+				await Subscriptions.findByRoomIdAndRoles(findResult.rid, ['moderator'], {
+					projection: { u: 1 },
+				}).toArray()
+			).map((sub: any) => sub.u);
 
 			return API.v1.success({
 				moderators,

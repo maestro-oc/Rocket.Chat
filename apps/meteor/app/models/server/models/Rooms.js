@@ -1,11 +1,12 @@
 import _ from 'underscore';
 import { escapeRegExp } from '@rocket.chat/string-helpers';
+import { Subscriptions } from '@rocket.chat/models';
 
 import { Base } from './_Base';
 import Messages from './Messages';
-import Subscriptions from './Subscriptions';
 import { trim } from '../../../../lib/utils/stringUtils';
 
+// TODO: Promise.awaits will go with the model so..
 class Rooms extends Base {
 	constructor(...args) {
 		super(...args);
@@ -392,9 +393,7 @@ class Rooms extends Base {
 	}
 
 	findBySubscriptionUserId(userId, options) {
-		const data = Subscriptions.cachedFindByUserId(userId, { fields: { rid: 1 } })
-			.fetch()
-			.map((item) => item.rid);
+		const data = Promise.await(Subscriptions.cachedFindByUserId(userId, { fields: { rid: 1 } }).toArray()).map((item) => item.rid);
 
 		const query = {
 			_id: {
@@ -421,9 +420,7 @@ class Rooms extends Base {
 	}
 
 	findBySubscriptionUserIdUpdatedAfter(userId, _updatedAt, options) {
-		const ids = Subscriptions.findByUserId(userId, { fields: { rid: 1 } })
-			.fetch()
-			.map((item) => item.rid);
+		const ids = Promise.await(Subscriptions.findByUserId(userId, { fields: { rid: 1 } }).toArray()).map((item) => item.rid);
 
 		const query = {
 			_id: {
