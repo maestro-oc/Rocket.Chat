@@ -3,8 +3,9 @@ import { Match } from 'meteor/check';
 import { TAPi18n } from 'meteor/rocketchat:tap-i18n';
 import { api } from '@rocket.chat/core-services';
 import { isRoomFederated } from '@rocket.chat/core-typings';
+import { Subscriptions } from '@rocket.chat/models';
 
-import { Rooms, Subscriptions, Users } from '../../../models/server';
+import { Rooms, Users } from '../../../models/server';
 import { hasPermission } from '../../../authorization/server';
 import { addUserToRoom } from '../functions';
 import { callbacks } from '../../../../lib/callbacks';
@@ -28,8 +29,8 @@ Meteor.methods({
 		// Get user and room details
 		const room = Rooms.findOneById(data.rid);
 		const userId = Meteor.userId();
-		const subscription = Subscriptions.findOneByRoomIdAndUserId(data.rid, userId, {
-			fields: { _id: 1 },
+		const subscription = await Subscriptions.findOneByRoomIdAndUserId(data.rid, userId, {
+			projection: { _id: 1 },
 		});
 		const userInRoom = subscription != null;
 
@@ -79,7 +80,7 @@ Meteor.methods({
 						method: 'addUsersToRoom',
 					});
 				}
-				const subscription = newUser && Subscriptions.findOneByRoomIdAndUserId(data.rid, newUser._id);
+				const subscription = newUser && (await Subscriptions.findOneByRoomIdAndUserId(data.rid, newUser._id));
 				if (!subscription) {
 					await addUserToRoom(data.rid, newUser || username, user);
 				} else {

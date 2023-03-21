@@ -66,15 +66,14 @@ class POP3Intercepter {
 		});
 
 		// on retrieved email
-		this.pop3.on('retr', (status, msgnumber, data) => {
+		this.pop3.on('retr', async (status, msgnumber, data) => {
 			if (!status) {
 				return console.log('Cannot Retrieve Message ....');
 			}
 
 			// parse raw email data to  JSON object
-			simpleParser(data, (err, mail) => {
-				processDirectEmail(mail);
-			});
+			const mail = await simpleParser(data);
+			await processDirectEmail(mail);
 
 			this.currentMsgCount += 1;
 

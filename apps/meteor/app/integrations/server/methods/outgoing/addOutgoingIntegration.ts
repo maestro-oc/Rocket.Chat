@@ -49,7 +49,7 @@ Meteor.methods<ServerMethods>({
 			}),
 		);
 
-		const integrationData = validateOutgoingIntegration(integration, userId);
+		const integrationData = await validateOutgoingIntegration(integration, userId);
 
 		const result = await Integrations.insertOne(integrationData);
 		integrationData._id = result.insertedId;

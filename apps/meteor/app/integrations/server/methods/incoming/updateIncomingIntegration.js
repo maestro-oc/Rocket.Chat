@@ -1,9 +1,9 @@
 import { Meteor } from 'meteor/meteor';
 import { Babel } from 'meteor/babel-compiler';
 import _ from 'underscore';
-import { Integrations, Roles } from '@rocket.chat/models';
+import { Integrations, Roles, Subscriptions } from '@rocket.chat/models';
 
-import { Rooms, Users, Subscriptions } from '../../../../models/server';
+import { Rooms, Users } from '../../../../models/server';
 import { hasAllPermission, hasPermission } from '../../../../authorization/server';
 
 const validChannelChars = ['@', '#'];
@@ -78,7 +78,7 @@ Meteor.methods({
 			}
 		}
 
-		for (let channel of channels) {
+		for await (let channel of channels) {
 			const channelType = channel[0];
 			channel = channel.substr(1);
 			let record;
@@ -104,7 +104,7 @@ Meteor.methods({
 
 			if (
 				!hasAllPermission(this.userId, ['manage-incoming-integrations', 'manage-own-incoming-integrations']) &&
-				!Subscriptions.findOneByRoomIdAndUserId(record._id, this.userId, { fields: { _id: 1 } })
+				!(await Subscriptions.findOneByRoomIdAndUserId(record._id, this.userId, { projection: { _id: 1 } }))
 			) {
 				throw new Meteor.Error('error-invalid-channel', 'Invalid Channel', {
 					method: 'updateIncomingIntegration',

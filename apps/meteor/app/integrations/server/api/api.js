@@ -151,7 +151,7 @@ function removeIntegration(options, user) {
 	return API.v1.success();
 }
 
-function executeIntegrationRest() {
+async function executeIntegrationRest() {
 	incomingLogger.info({ msg: 'Post integration:', integration: this.integration.name });
 	incomingLogger.debug({ urlParams: this.urlParams, bodyParams: this.bodyParams });
 
@@ -270,7 +270,7 @@ function executeIntegrationRest() {
 	this.bodyParams.bot = { i: this.integration._id };
 
 	try {
-		const message = processWebhookMessage(this.bodyParams, this.user, defaultValues);
+		const message = await processWebhookMessage(this.bodyParams, this.user, defaultValues);
 		if (_.isEmpty(message)) {
 			return API.v1.failure('unknown-error');
 		}
