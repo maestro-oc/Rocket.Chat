@@ -18,8 +18,8 @@ function notifyUsersOnReply(message, replies, room) {
 	return message;
 }
 
-const metaData = (message, parentMessage, followers) => {
-	reply({ tmid: message.tmid }, message, parentMessage, followers);
+const metaData = async (message, parentMessage, followers) => {
+	await reply({ tmid: message.tmid }, message, parentMessage, followers);
 
 	return message;
 };
@@ -36,7 +36,7 @@ const notification = (message, room, replies) => {
 	return message;
 };
 
-export const processThreads = (message, room) => {
+export const processThreads = async (message, room) => {
 	if (!message.tmid) {
 		return message;
 	}
@@ -57,7 +57,7 @@ export const processThreads = (message, room) => {
 	].filter((userId) => userId !== message.u._id);
 
 	notifyUsersOnReply(message, replies, room);
-	metaData(message, parentMessage, replies);
+	await metaData(message, parentMessage, replies);
 	notification(message, room, replies);
 
 	return message;

@@ -1,11 +1,12 @@
 import { Meteor } from 'meteor/meteor';
 import { check } from 'meteor/check';
+import { Subscriptions } from '@rocket.chat/models';
 
-import { Rooms, Subscriptions } from '../../app/models/server';
+import { Rooms } from '../../app/models/server';
 import { hasPermission } from '../../app/authorization/server';
 
 Meteor.methods({
-	getRoomNameById(rid) {
+	async getRoomNameById(rid) {
 		check(rid, String);
 		const userId = Meteor.userId();
 		if (!userId) {
@@ -22,8 +23,8 @@ Meteor.methods({
 			});
 		}
 
-		const subscription = Subscriptions.findOneByRoomIdAndUserId(rid, userId, {
-			fields: { _id: 1 },
+		const subscription = await Subscriptions.findOneByRoomIdAndUserId(rid, userId, {
+			projection: { _id: 1 },
 		});
 		if (subscription) {
 			return room.name;

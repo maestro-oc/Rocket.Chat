@@ -1,13 +1,14 @@
 import { Meteor } from 'meteor/meteor';
 import { check } from 'meteor/check';
+import { Subscriptions } from '@rocket.chat/models';
 
 import { hasPermission } from '../../app/authorization/server';
-import { Users, Rooms, Subscriptions, Messages } from '../../app/models/server';
+import { Users, Rooms, Messages } from '../../app/models/server';
 import { settings } from '../../app/settings/server';
 import { callbacks } from '../../lib/callbacks';
 
 Meteor.methods({
-	addAllUserToRoom(rid, activeUsersOnly = false) {
+	async addAllUserToRoom(rid, activeUsersOnly = false) {
 		check(rid, String);
 		check(activeUsersOnly, Boolean);
 
@@ -39,13 +40,13 @@ Meteor.methods({
 
 		const users = userCursor.fetch();
 		const now = new Date();
-		users.forEach(function (user) {
-			const subscription = Subscriptions.findOneByRoomIdAndUserId(rid, user._id);
+		for await (const user of users) {
+			const subscription = await Subscriptions.findOneByRoomIdAndUserId(rid, user._id);
 			if (subscription != null) {
 				return;
 			}
 			callbacks.run('beforeJoinRoom', user, room);
-			Subscriptions.createWithRoomAndUser(room, user, {
+			await Subscriptions.createWithRoomAndUser(room, user, {
 				ts: now,
 				open: true,
 				alert: true,
@@ -58,7 +59,7 @@ Meteor.methods({
 			});
 			Meteor.defer(function () {});
 			return callbacks.run('afterJoinRoom', user, room);
-		});
+		}
 		return true;
 	},
 });

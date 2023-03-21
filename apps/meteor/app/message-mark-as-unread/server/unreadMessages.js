@@ -1,8 +1,7 @@
 import { Meteor } from 'meteor/meteor';
-import { Messages } from '@rocket.chat/models';
+import { Messages, Subscriptions } from '@rocket.chat/models';
 
 import logger from './logger';
-import { Subscriptions } from '../../models/server';
 
 Meteor.methods({
 	async unreadMessages(firstUnreadMessage, room) {
@@ -52,7 +51,7 @@ Meteor.methods({
 				action: 'Unread_messages',
 			});
 		}
-		const lastSeen = Subscriptions.findOneByRoomIdAndUserId(originalMessage.rid, userId).ls;
+		const lastSeen = (await Subscriptions.findOneByRoomIdAndUserId(originalMessage.rid, userId)).ls;
 		if (firstUnreadMessage.ts >= lastSeen) {
 			return logger.debug('Provided message is already marked as unread');
 		}

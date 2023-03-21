@@ -2,9 +2,10 @@ import { Meteor } from 'meteor/meteor';
 import { check } from 'meteor/check';
 import { api, Team } from '@rocket.chat/core-services';
 import { isRoomFederated } from '@rocket.chat/core-typings';
+import { Subscriptions } from '@rocket.chat/models';
 
 import { hasPermission } from '../../app/authorization/server';
-import { Users, Subscriptions, Messages, Rooms } from '../../app/models/server';
+import { Users, Messages, Rooms } from '../../app/models/server';
 import { settings } from '../../app/settings/server';
 
 Meteor.methods({
@@ -33,7 +34,7 @@ Meteor.methods({
 			});
 		}
 
-		const subscription = Subscriptions.findOneByRoomIdAndUserId(rid, user._id);
+		const subscription = await Subscriptions.findOneByRoomIdAndUserId(rid, user._id);
 
 		if (!subscription) {
 			throw new Meteor.Error('error-invalid-room', 'Invalid room', {
@@ -47,7 +48,7 @@ Meteor.methods({
 			});
 		}
 
-		Subscriptions.removeRoleById(subscription._id, 'moderator');
+		await Subscriptions.removeRoleById(subscription._id, 'moderator');
 
 		const fromUser = Users.findOneById(Meteor.userId());
 

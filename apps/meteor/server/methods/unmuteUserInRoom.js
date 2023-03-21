@@ -1,14 +1,15 @@
 import { Meteor } from 'meteor/meteor';
 import { Match, check } from 'meteor/check';
+import { Subscriptions } from '@rocket.chat/models';
 
 import { hasPermission } from '../../app/authorization/server';
 import { callbacks } from '../../lib/callbacks';
-import { Rooms, Subscriptions, Users, Messages } from '../../app/models/server';
+import { Rooms, Users, Messages } from '../../app/models/server';
 import { roomCoordinator } from '../lib/rooms/roomCoordinator';
 import { RoomMemberActions } from '../../definition/IRoomTypeConfig';
 
 Meteor.methods({
-	unmuteUserInRoom(data) {
+	async unmuteUserInRoom(data) {
 		const fromId = Meteor.userId();
 
 		check(
@@ -40,9 +41,10 @@ Meteor.methods({
 			});
 		}
 
-		const subscription = Subscriptions.findOneByRoomIdAndUsername(data.rid, data.username, {
-			fields: { _id: 1 },
+		const subscription = await Subscriptions.findOneByRoomIdAndUsername(data.rid, data.username, {
+			projection: { _id: 1 },
 		});
+
 		if (!subscription) {
 			throw new Meteor.Error('error-user-not-in-room', 'User is not in this room', {
 				method: 'unmuteUserInRoom',

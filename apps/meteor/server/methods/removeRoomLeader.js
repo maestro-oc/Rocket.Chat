@@ -1,9 +1,10 @@
 import { Meteor } from 'meteor/meteor';
 import { check } from 'meteor/check';
 import { api, Team } from '@rocket.chat/core-services';
+import { Subscriptions } from '@rocket.chat/models';
 
 import { hasPermission } from '../../app/authorization/server';
-import { Users, Subscriptions, Messages } from '../../app/models/server';
+import { Users, Messages } from '../../app/models/server';
 import { settings } from '../../app/settings/server';
 
 Meteor.methods({
@@ -31,7 +32,7 @@ Meteor.methods({
 			});
 		}
 
-		const subscription = Subscriptions.findOneByRoomIdAndUserId(rid, user._id);
+		const subscription = await Subscriptions.findOneByRoomIdAndUserId(rid, user._id);
 
 		if (!subscription) {
 			throw new Meteor.Error('error-user-not-in-room', 'User is not in this room', {
@@ -45,7 +46,7 @@ Meteor.methods({
 			});
 		}
 
-		Subscriptions.removeRoleById(subscription._id, 'leader');
+		await Subscriptions.removeRoleById(subscription._id, 'leader');
 
 		const fromUser = Users.findOneById(Meteor.userId());
 
